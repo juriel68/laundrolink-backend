@@ -1,0 +1,47 @@
+name: Run LaundroLink Analytics
+
+on:
+  schedule:
+    # Run every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch: # Allows you to click a button to run it manually
+
+jobs:
+  run-analytics:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          cd Analytics
+          pip install -r requirements.txt
+
+      - name: Run Customer Segmentation
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: laundrolink_db
+          DB_PORT: 4000
+        run: |
+          cd Analytics
+          python customer_segmentation.py
+
+      - name: Run Admin Analytics
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: laundrolink_db
+          DB_PORT: 4000
+        run: |
+          cd Analytics
+          python admin_analytics.py
