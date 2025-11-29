@@ -83,6 +83,7 @@ router.get("/nearby", async (req, res) => {
         
         res.json({ success: true, shops });
     } catch (error) {
+        console.error("Nearby Fetch Error:", error);
         res.status(500).json({ success: false, message: "Failed to fetch nearby shops." });
     } finally {
         connection.release();
