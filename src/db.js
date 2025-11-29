@@ -39,6 +39,9 @@ const pool = mysql.createPool({
     password: DB_PASS, 
     database: DB_NAME,
     port: DB_PORT,
+    ssl: {
+        rejectUnauthorized: true 
+    }
 });
 
 /**
