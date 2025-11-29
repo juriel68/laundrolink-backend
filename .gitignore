@@ -1,0 +1,32 @@
+# Node and Expo
+node_modules/
+.expo/
+.expo-shared/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+coverage/
+
+# React Native / Expo Metro Bundler cache
+.expo/
+.expo-shared/
+*.log
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# System
+.DS_Store
+Thumbs.db
+
+# PHP / Laravel style (in case)
+vendor/
+storage/
+.idea/
+.vscode/
