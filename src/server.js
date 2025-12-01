@@ -32,8 +32,7 @@ const allowedOrigins = [
     'http://localhost:3000', // React/Next.js frontend default
     'http://127.0.0.1:8081',
     'http://127.0.0.1:8080',
-    'https://laundrolink-backend.onrender.com',
-    'https://laundrolink-admin.rf.gd',
+    'http://laundrolink-backend.onrender.com',
 ];
 
 app.use(cors({
