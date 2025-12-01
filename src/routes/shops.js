@@ -34,6 +34,7 @@ router.get("/", async (req, res) => {
         `);
         res.json({ shops });
     } catch (error) {
+        console.error("Fetch Shops Error:", error);
         res.status(500).json({ error: "Failed to fetch shop list." });
     } finally {
         connection.release();

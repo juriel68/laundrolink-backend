@@ -25,11 +25,11 @@ const app = express();
 // --- Robust CORS Configuration ---
 const allowedOrigins = [
     'http://localhost',
-    // 1. Local Development Environments
+    // 1. Local Development Environmentss
     'http://localhost:8081',
     'http://localhost:8082', // React Native Dev Server (common default)
     'http://localhost:8080', // Default port for Web apps (where system_settings.php likely runs)
-    'http://localhost:3000', // React/Next.js frontend default
+    'http://localhost:3000', // React/Next.js frontend defaultt
     'http://127.0.0.1:8081',
     'http://127.0.0.1:8080',
     'https://laundrolink-backend.onrender.com',
