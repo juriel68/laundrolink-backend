@@ -25,7 +25,7 @@ const app = express();
 // --- Robust CORS Configuration ---
 const allowedOrigins = [
     'http://localhost',
-    // 1. Local Development Environmentss
+    // 1. Local Development Environmentsss
     'http://localhost:8081',
     'http://localhost:8082', // React Native Dev Server (common default)
     'http://localhost:8080', // Default port for Web apps (where system_settings.php likely runs)
