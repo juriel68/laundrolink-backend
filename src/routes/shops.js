@@ -29,7 +29,6 @@ router.get("/", async (req, res) => {
                 NULL AS distance
             FROM Laundry_Shops AS LS
             LEFT JOIN Shop_Rates AS SR ON LS.ShopID = SR.ShopID
-            GROUP BY LS.ShopID
             ORDER BY LS.ShopName;
         `);
         res.json({ shops });
