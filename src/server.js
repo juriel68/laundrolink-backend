@@ -34,6 +34,7 @@ const allowedOrigins = [
     'http://127.0.0.1:8080',
     'https://laundrolink-backend.onrender.com',
     'http://laundrolink-admin.rf.gd',
+    'https://laundrolink-admin.rf.gd',
 ];
 
 app.use(cors({
