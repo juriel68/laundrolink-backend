@@ -63,9 +63,6 @@ router.post("/", async (req, res) => {
             throw new Error("This shop does not support the selected delivery type.");
         }
 
-        // ❌ REMOVED: Staff Assignment Logic (Since StaffID was removed from Orders table)
-        // This ensures the order is visible to ALL staff in that shop.
-
         // 2. Create Order Record (🟢 UPDATED: Removed StaffID from INSERT)
         const newOrderID = generateID('ODR'); 
         await connection.query(
@@ -521,7 +518,12 @@ router.post("/cancel", async (req, res) => {
         }
 
         await connection.query(
-            "UPDATE Invoices SET PaymentStatus = 'Voided', StatusUpdatedAt = NOW() WHERE OrderID = ?",
+            "UPDATE Invoices SET PaymentStatus = 'Cancelled', StatusUpdatedAt = NOW() WHERE OrderID = ?",
+            [orderId]
+        );
+
+        await connection.query(
+            "UPDATE Delivery_Payments SET DlvryPaymentStatus = 'Voided', StatusUpdatedAt = NOW() WHERE OrderID = ?",
             [orderId]
         );
         
