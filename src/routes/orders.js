@@ -1158,35 +1158,70 @@ router.post("/report/order-types", async (req, res) => {
     }
 });
 
+
 router.get("/sales/:shopId", async (req, res) => {
     const { shopId } = req.params;
     const { period = 'Weekly', limit, offset } = req.query;
-    const dateCondition = getDateCondition(period, 'o'); 
+    
+    // Helper for date condition (reused from your file)
+    const dateCondition = getDateCondition(period, 'T'); // Use generic alias 'T' for the union
+    
     const parsedLimit = parseInt(limit, 10) || 15;
     const parsedOffset = parseInt(offset, 10) || 0;
 
     try {
-        const transactionsQuery = `
-            SELECT o.OrderID, i.PayAmount, i.StatusUpdatedAt AS PaidAt
-            FROM Orders o JOIN Invoices i ON o.OrderID = i.OrderID
-            WHERE o.ShopID = ? AND ${dateCondition} AND i.PaymentStatus = 'Paid'
-            ORDER BY PaidAt DESC LIMIT ? OFFSET ?`;
-
-        const [transactions] = await db.query(transactionsQuery, [shopId, parsedLimit, parsedOffset]);
-
-        const countQuery = `
-            SELECT COUNT(o.OrderID) AS totalCount, SUM(i.PayAmount) AS totalSales
-            FROM Orders o JOIN Invoices i ON o.OrderID = i.OrderID
-            WHERE o.ShopID = ? AND ${dateCondition} AND i.PaymentStatus = 'Paid'`;
         
-        const [countRows] = await db.query(countQuery, [shopId]);
+        const getDynamicDate = (p) => {
+            switch (p) {
+                case "Today": return `DATE(T.PaidAt) = CURDATE()`;
+                case "Weekly": default: return `YEARWEEK(T.PaidAt, 1) = YEARWEEK(CURDATE(), 1)`;
+                case "Monthly": return `YEAR(T.PaidAt) = YEAR(CURDATE()) AND MONTH(T.PaidAt) = MONTH(CURDATE())`;
+                case "Yearly": return `YEAR(T.PaidAt) = YEAR(CURDATE())`;
+            }
+        };
+        const whereClause = getDynamicDate(period);
+
+        const baseUnion = `
+            SELECT o.OrderID, i.PayAmount AS PayAmount, i.StatusUpdatedAt AS PaidAt, 'Service' as Type
+            FROM Orders o JOIN Invoices i ON o.OrderID = i.OrderID
+            WHERE o.ShopID = ? AND i.PaymentStatus = 'Paid'
+            
+            UNION ALL
+            
+            SELECT o.OrderID, dp.DlvryAmount AS PayAmount, dp.StatusUpdatedAt AS PaidAt, 'Delivery' as Type
+            FROM Orders o JOIN Delivery_Payments dp ON o.OrderID = dp.OrderID
+            WHERE o.ShopID = ? AND dp.DlvryPaymentStatus = 'Paid'
+        `;
+
+        // 1. Fetch Paginated Transactions
+        const transactionsQuery = `
+            SELECT * FROM (${baseUnion}) AS T
+            WHERE ${whereClause}
+            ORDER BY T.PaidAt DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        // 2. Fetch Totals (Count & Sum)
+        const countQuery = `
+            SELECT COUNT(*) AS totalCount, SUM(T.PayAmount) AS totalSales
+            FROM (${baseUnion}) AS T
+            WHERE ${whereClause}
+        `;
+
+        const [transactions] = await db.query(transactionsQuery, [shopId, shopId, parsedLimit, parsedOffset]);
+        const [countRows] = await db.query(countQuery, [shopId, shopId]);
 
         res.json({
-            summary: { totalSales: countRows[0].totalSales || 0 },
+            summary: { 
+                totalSales: countRows[0].totalSales || 0,
+                totalOrders: countRows[0].totalCount || 0 // Sending explicit count for Avg Calc
+            },
             transactions: transactions,
             totalCount: countRows[0].totalCount || 0
         });
+
     } catch (error) {
+        console.error("Sales Fetch Error:", error);
         res.status(500).json({ error: "Failed to fetch sales" });
     }
 });

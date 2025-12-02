@@ -51,7 +51,7 @@ router.get("/nearby", async (req, res) => {
         
         const latitude = parseFloat(lat);
         const longitude = parseFloat(lon);
-        const maxDistanceKm = 300; // Testing radius
+        const maxDistanceKm = 1; // Testing radius
 
         const query = `
             SELECT 
